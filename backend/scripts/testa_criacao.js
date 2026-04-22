@@ -1,0 +1,25 @@
+const SQL = require('sql.js');
+SQL().then(SQL => {
+  const db = new SQL.Database();
+  db.exec('CREATE TABLE Usuario (id TEXT PRIMARY KEY, nome TEXT, email TEXT UNIQUE, senha TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')), movimentacoes TEXT)');
+  console.log('Usuario OK');
+  db.exec('CREATE TABLE Categoria (id TEXT PRIMARY KEY, nome TEXT UNIQUE, descricao TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')), produtos TEXT)');
+  console.log('Categoria OK');
+  db.exec('CREATE TABLE Vendedor (id TEXT PRIMARY KEY, nome TEXT UNIQUE, criado_em DATETIME DEFAULT (datetime(\'now\')), movimentacoes TEXT, pedidos TEXT)');
+  console.log('Vendedor OK');
+  db.exec('CREATE TABLE Produto (id TEXT PRIMARY KEY, nome TEXT, sku TEXT UNIQUE, custo REAL, preco_venda REAL, qtd_estoque INTEGER DEFAULT 0, criado_em DATETIME DEFAULT (datetime(\'now\')), movimentacoes TEXT)');
+  console.log('Produto OK');
+  db.exec('CREATE TABLE Movimentacao (id TEXT PRIMARY KEY, usuarioId TEXT, produtoId TEXT, tipo TEXT, quantidade INTEGER, valor_unit REAL, valor_total REAL, observacao TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')))');
+  console.log('Movimentacao OK');
+  db.exec('CREATE TABLE Cliente (id TEXT PRIMARY KEY, nome TEXT, numero TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')))');
+  console.log('Cliente OK');
+  db.exec('CREATE TABLE Pedido (id TEXT PRIMARY KEY, texto TEXT, preco REAL, data_pedido DATETIME DEFAULT (datetime(\'now\')), data_entrega DATETIME, status TEXT DEFAULT \'EM_PRODUCAO\', clienteId TEXT, vendedorId TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')), atualizado_em DATETIME DEFAULT (datetime(\'now\')))');
+  console.log('Pedido OK');
+  db.exec('CREATE TABLE Encomenda (id TEXT PRIMARY KEY, produtoId TEXT, produto TEXT, quantidade INTEGER, custo_unit REAL, custo_total REAL, status TEXT, clienteId TEXT, vendedorId TEXT, criado_em DATETIME DEFAULT (datetime(\'now\')), pedido TEXT)');
+  console.log('Encomenda OK');
+  db.exec('CREATE TABLE _prisma_migrations (id TEXT PRIMARY KEY, migration_name TEXT, migration_hash TEXT, applied_steps_count INTEGER, migration_timestamp DATETIME DEFAULT (datetime(\'now\')))');
+  console.log('_prisma_migrations OK');
+  const out = db.export();
+  require('fs').writeFileSync('prisma/dev.db', out);
+  console.log('Banco salvo com sucesso!');
+}).catch(console.error);

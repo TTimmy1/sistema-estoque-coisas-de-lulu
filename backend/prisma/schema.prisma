@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Usuario {
+  id            String         @id @default(cuid())
+  nome          String
+  email         String         @unique
+  senha         String
+  criado_em     DateTime       @default(now())
+  movimentacoes Movimentacao[]
+}
+
+model Vendedor {
+  id            String         @id @default(cuid())
+  nome          String         @unique
+  criado_em     DateTime       @default(now())
+  movimentacoes Movimentacao[]
+  pedidos       Pedido[]
+  encomendas    Encomenda[]
+}
+
+model Loja {
+  id            String         @id @default(cuid())
+  nome          String         @unique
+  criado_em     DateTime       @default(now())
+  produtos      Produto[]
+  movimentacoes Movimentacao[]
+  pedidos       Pedido[]
+  encomendas    Encomenda[]
+}
+
+model Categoria {
+  id        String    @id @default(cuid())
+  nome      String    @unique
+  descricao String?
+  criado_em DateTime  @default(now())
+  produtos  Produto[]
+}
+
+model Produto {
+  id            String         @id @default(cuid())
+  nome          String
+  sku           String         @unique
+  custo         Float
+  preco_venda   Float
+  qtd_estoque   Int            @default(0)
+  categoriaId   String?
+  lojaId        String?
+  criado_em     DateTime       @default(now())
+  movimentacoes Movimentacao[]
+  encomendas    Encomenda[]
+  categoria     Categoria?     @relation(fields: [categoriaId], references: [id])
+  loja          Loja?          @relation(fields: [lojaId], references: [id])
+}
+
+model Movimentacao {
+  id               String    @id @default(cuid())
+  usuarioId        String
+  produtoId        String
+  vendedorId       String?
+  lojaId           String?
+  tipo             String
+  quantidade       Int
+  valor_unit       Float
+  valor_total      Float
+  desconto         Float?    @default(0)
+  observacao       String?
+  telefone_cliente String?
+  criado_em        DateTime  @default(now())
+  vendedor         Vendedor? @relation(fields: [vendedorId], references: [id])
+  produto          Produto   @relation(fields: [produtoId], references: [id])
+  usuario          Usuario   @relation(fields: [usuarioId], references: [id])
+  loja             Loja?     @relation(fields: [lojaId], references: [id])
+
+  @@index([usuarioId])
+  @@index([produtoId])
+  @@index([vendedorId])
+  @@index([lojaId])
+  @@index([tipo])
+  @@index([criado_em])
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  nome      String
+  numero    String
+  criado_em DateTime @default(now())
+  pedidos   Pedido[]
+}
+
+model Pedido {
+  id            String    @id @default(cuid())
+  texto         String
+  preco         Float
+  data_pedido   DateTime  @default(now())
+  data_entrega  DateTime?
+  status        String    @default("EM_PRODUCAO")
+  clienteId     String
+  vendedorId    String
+  lojaId        String?
+  criado_em     DateTime  @default(now())
+  atualizado_em DateTime  @updatedAt
+  vendedor      Vendedor  @relation(fields: [vendedorId], references: [id])
+  cliente       Cliente   @relation(fields: [clienteId], references: [id])
+  loja          Loja?     @relation(fields: [lojaId], references: [id])
+
+  @@index([clienteId])
+  @@index([vendedorId])
+  @@index([lojaId])
+  @@index([status])
+  @@index([data_pedido])
+}
+
+model Encomenda {
+  id               String    @id @default(cuid())
+  pedido           String    // Descrição do pedido (ex: "Caneca Stitch")
+  quantidade       Int?      @default(1)
+  valor_unit       Float?
+  valor_total      Float?
+  status           String?   @default("PENDENTE")
+  nome_cliente     String?
+  telefone_cliente String?
+  previsao_entrega DateTime?
+  vendedorId       String?
+  lojaId           String?
+  vendedor         Vendedor? @relation(fields: [vendedorId], references: [id])
+  loja             Loja?     @relation(fields: [lojaId], references: [id])
+  criado_em        DateTime  @default(now())
+  valor_sinal      Float?    @default(0)
+  pago_total       Boolean   @default(false)
+
+  // Campos legados ou opcionais
+  produtoId        String?
+  produto          Produto?  @relation(fields: [produtoId], references: [id])
+  clienteId        String?
+
+  @@index([vendedorId])
+  @@index([lojaId])
+  @@index([status])
+  @@index([criado_em])
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model prisma_migrations {
+  id                  String?   @id
+  migration_name      String?
+  migration_hash      String?
+  applied_steps_count Int?
+  migration_timestamp DateTime? @default(now())
+
+  @@map("_prisma_migrations")
+  @@ignore
+}

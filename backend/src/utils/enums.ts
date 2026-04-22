@@ -1,0 +1,11 @@
+export enum TipoMovimentacao {
+  ENTRADA = 'ENTRADA',
+  SAIDA_VENDA = 'SAIDA_VENDA',
+  SAIDA_DESCARTE = 'SAIDA_DESCARTE',
+}
+
+export enum StatusPedido {
+  EM_PRODUCAO = 'EM_PRODUCAO',
+  PRONTO_PARA_ENTREGA = 'PRONTO_PARA_ENTREGA',
+  ENTREGUE = 'ENTREGUE',
+}

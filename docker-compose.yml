@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: estoque-db
+    restart: always
+    environment:
+      POSTGRES_USER: estoque
+      POSTGRES_PASSWORD: estoque123
+      POSTGRES_DB: estoque_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U estoque -d estoque_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - estoque-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: estoque-backend
+    restart: always
+    environment:
+      DATABASE_URL: "postgresql://estoque:estoque123@db:5432/estoque_db?schema=public"
+      JWT_SECRET: "sua-chave-secreta-mude-em-producao-2026"
+      PORT: 3333
+      FRONTEND_URL: "http://localhost:80"
+    ports:
+      - "3333:3333"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - estoque-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: estoque-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - estoque-net
+
+volumes:
+  postgres_data:
+
+networks:
+  estoque-net:
+    driver: bridge

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs
+dist/
+backend/dist/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+
+# Logs
+*.log
+backend/*.log
+frontend/*.log
+
+# IDE / System files
+.vscode/
+.DS_Store
+Thumbs.db
+.idea/
+
+# Assistant metadata
+.openclaude/
+.gemini/
+
+# References (as requested by user)
+referencias/

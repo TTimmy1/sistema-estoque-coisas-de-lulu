@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  criado_em DateTime @default(now())
+  movimentacoes Movimentacao[]
+}
+
+model Vendedor {
+  id            String   @id @default(cuid())
+  nome          String   @unique
+  criado_em     DateTime @default(now())
+  movimentacoes Movimentacao[]
+  pedidos       Pedido[]
+}
+
+model Produto {
+  id            String   @id @default(cuid())
+  nome          String
+  sku           String   @unique
+  custo         Float
+  preco_venda   Float
+  qtd_estoque   Int      @default(0)
+  criado_em     DateTime @default(now())
+  movimentacoes Movimentacao[]
+}
+
+model Movimentacao {
+  id           String   @id @default(cuid())
+  usuarioId    String
+  usuario      Usuario  @relation(fields: [usuarioId], references: [id])
+  produtoId    String
+  produto      Produto  @relation(fields: [produtoId], references: [id])
+  tipo         String
+  quantidade   Int
+  valor_unit   Float
+  valor_total  Float
+  criado_em    DateTime @default(now())
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  nome      String
+  numero    String
+  criado_em DateTime @default(now())
+}
+
+model Pedido {
+  id              String   @id @default(cuid())
+  texto           String
+  preco           Float
+  data_pedido     DateTime @default(now())
+  data_entrega    DateTime?
+  status          String   @default("EM_PRODUCAO")
+  clienteId       String
+  cliente         Cliente  @relation(fields: [clienteId], references: [id])
+  vendedorId      String
+  vendedor        Vendedor @relation(fields: [vendedorId], references: [id])
+  criado_em       DateTime @default(now())
+}
