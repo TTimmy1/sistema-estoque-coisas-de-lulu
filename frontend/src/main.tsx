@@ -14,6 +14,7 @@ import Historico from './pages/Historico';
 import Categorias from './pages/Categorias';
 import Vendedores from './pages/Vendedores';
 import Encomendas from './pages/Encomendas';
+import Aprovacoes from './pages/Aprovacoes';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -45,6 +46,7 @@ function AppRoutes() {
         <Route path="categorias" element={<Categorias />} />
         <Route path="vendedores" element={<Vendedores />} />
         <Route path="encomendas" element={<Encomendas />} />
+        <Route path="aprovacoes" element={<Aprovacoes />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

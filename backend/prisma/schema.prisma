@@ -12,6 +12,8 @@ model Usuario {
   nome          String
   email         String         @unique
   senha         String
+  role          String         @default("USER")
+  status        String         @default("PENDENTE")
   criado_em     DateTime       @default(now())
   movimentacoes Movimentacao[]
 }
@@ -49,6 +51,7 @@ model Produto {
   sku           String         @unique
   custo         Float
   preco_venda   Float
+  codigo_barras String?
   qtd_estoque   Int            @default(0)
   categoriaId   String?
   lojaId        String?

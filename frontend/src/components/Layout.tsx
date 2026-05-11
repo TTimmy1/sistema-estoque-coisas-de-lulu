@@ -14,6 +14,7 @@ import {
   Truck,
   Menu,
   X,
+  UserCog,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -33,16 +34,19 @@ export default function Layout() {
     navigate('/login');
   };
 
-  const navItems = [
+  const allNavItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/produtos', icon: Package, label: 'Produtos' },
     { to: '/entrada', icon: ArrowDownCircle, label: 'Entrada' },
     { to: '/saida', icon: ArrowUpCircle, label: 'Saída' },
     { to: '/historico', icon: History, label: 'Histórico' },
     { to: '/categorias', icon: Tags, label: 'Categorias' },
-    { to: '/vendedores', icon: Users, label: 'Vendedores' },
+    { to: '/vendedores', icon: Users, label: 'Vendedores', adminOnly: true },
     { to: '/encomendas', icon: Truck, label: 'Encomendas' },
+    { to: '/aprovacoes', icon: UserCog, label: 'Aprovações', adminOnly: true },
   ];
+
+  const navItems = allNavItems.filter(item => usuario?.role === 'ADMIN' || !item.adminOnly);
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-50 overflow-hidden relative">

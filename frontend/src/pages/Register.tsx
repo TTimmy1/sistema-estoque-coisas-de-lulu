@@ -7,15 +7,18 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [role, setRole] = useState('USER');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sucesso, setSucesso] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await register(nome, email, senha);
+      await register(nome, email, senha, role);
+      setSucesso(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erro ao registrar';
       setError(message);
@@ -35,7 +38,23 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
           <p className="text-gray-400 text-sm mt-1">Registre-se para acessar o sistema</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8">
+        {sucesso ? (
+          <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8 text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 mx-auto">
+              <Lock className="w-7 h-7 text-amber-500" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-800">Solicitação Enviada!</h2>
+            <p className="text-sm text-gray-500">
+              Sua conta está <span className="font-semibold text-amber-600">aguardando aprovação</span> de um administrador. Assim que for aprovada, você poderá fazer login normalmente.
+            </p>
+            <button
+              onClick={onSwitchToLogin}
+              className="w-full btn-primary justify-center py-2.5 text-base"
+            >
+              Ir para o Login
+            </button>
+          </div>
+        ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="form-label">Nome</label>
@@ -81,6 +100,17 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
                 />
               </div>
             </div>
+            <div>
+              <label className="form-label">Tipo de Conta</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="input-field"
+              >
+                <option value="USER">Funcionário (Acesso Limitado)</option>
+                <option value="ADMIN">Administrador (Acesso Total)</option>
+              </select>
+            </div>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
                 {error}
@@ -94,14 +124,16 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
               {loading ? 'Registrando...' : 'Registrar'}
             </button>
           </form>
-        </div>
+        )}
 
-        <p className="text-center mt-6 text-sm text-gray-500">
-          Já tem conta?{' '}
-          <button onClick={onSwitchToLogin} className="text-brand-500 hover:text-brand-600 font-medium">
-            Entrar
-          </button>
-        </p>
+        {!sucesso && (
+          <p className="text-center mt-6 text-sm text-gray-500">
+            Já tem conta?{' '}
+            <button onClick={onSwitchToLogin} className="text-brand-500 hover:text-brand-600 font-medium">
+              Entrar
+            </button>
+          </p>
+        )}
       </div>
     </div>
   );

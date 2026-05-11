@@ -8,6 +8,7 @@ const createSchema = z.object({
   categoriaId: z.string().cuid().optional().nullable(),
   custo: z.coerce.number().positive('Custo deve ser positivo'),
   preco_venda: z.coerce.number().positive('Preço de venda deve ser positivo'),
+  codigo_barras: z.string().optional().nullable(),
   qtd_estoque: z.coerce.number().int().nonnegative().default(0),
 });
 
@@ -17,6 +18,7 @@ const updateSchema = z.object({
   categoriaId: z.string().cuid().optional().nullable(),
   custo: z.coerce.number().positive().optional(),
   preco_venda: z.coerce.number().positive().optional(),
+  codigo_barras: z.string().optional().nullable(),
 });
 
 export async function index(req: Request, res: Response) {
@@ -34,6 +36,7 @@ export async function index(req: Request, res: Response) {
     where.OR = [
       { nome: { contains: String(busca), mode: 'insensitive' } },
       { sku: { contains: String(busca), mode: 'insensitive' } },
+      { codigo_barras: { contains: String(busca), mode: 'insensitive' } },
     ];
   }
   if (categoriaId) {
@@ -99,6 +102,7 @@ export async function create(req: Request, res: Response) {
       categoriaId: data.categoriaId,
       custo: data.custo,
       preco_venda: data.preco_venda,
+      codigo_barras: data.codigo_barras,
       qtd_estoque: data.qtd_estoque,
       lojaId,
     },

@@ -268,6 +268,7 @@ export async function index(req: Request, res: Response) {
       include: {
         produto: { select: { id: true, nome: true, sku: true } },
         usuario: { select: { id: true, nome: true, email: true } },
+        vendedor: { select: { id: true, nome: true } },
       },
       orderBy: { criado_em: 'desc' },
       skip,
@@ -312,17 +313,18 @@ export async function show(req: Request, res: Response) {
 
 // ─── Dashboard - Resumo ─────────────────────────────────
 
-export async function dashboard(req: Request, res: Response) {
+export async function dashboard(req: AuthRequest, res: Response) {
   const lojaId = req.headers['x-loja-id'] as string;
 
   if (!lojaId) {
     return res.status(400).json({ error: 'Loja não informada' });
   }
 
+  // Totais gerais
   const totalProdutos = await prisma.produto.count({ where: { lojaId } });
   const valorEstoque = await prisma.produto.aggregate({
     _sum: { custo: true },
-    where: { lojaId }
+    where: { lojaId },
   });
 
   const movimentacoesHoje = await prisma.movimentacao.count({
@@ -348,12 +350,57 @@ export async function dashboard(req: Request, res: Response) {
     },
   });
 
+  const { vendedorId } = req.query;
+  const usuario = req.usuario!;
+
+  let baseWhereVendas: any = {
+    lojaId,
+    tipo: TipoMovimentacao.SAIDA_VENDA,
+  };
+
+  if (usuario.role !== 'ADMIN') {
+    const myVendedor = await prisma.vendedor.findFirst({
+      where: { nome: usuario.nome }
+    });
+    if (myVendedor) {
+      baseWhereVendas.vendedorId = myVendedor.id;
+    } else {
+      baseWhereVendas.usuarioId = usuario.id;
+    }
+  } else if (vendedorId) {
+    baseWhereVendas.vendedorId = vendedorId as string;
+  }
+
+  // Receita do mês
   const receitaMes = await prisma.movimentacao.aggregate({
     _sum: { valor_total: true },
     where: {
-      lojaId,
-      tipo: TipoMovimentacao.SAIDA_VENDA,
+      ...baseWhereVendas,
       criado_em: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
+    },
+  });
+
+  // Vendas hoje
+  const vendasDiaAgg = await prisma.movimentacao.aggregate({
+    _sum: { valor_total: true },
+    where: {
+      ...baseWhereVendas,
+      criado_em: { gte: new Date(new Date().toDateString()) },
+    },
+  });
+
+  // Vendas da semana (segunda a hoje)
+  const hoje = new Date();
+  const diaSemana = hoje.getDay(); // 0=domingo
+  const diff = diaSemana === 0 ? 6 : diaSemana - 1; // quantos dias voltar para segunda-feira
+  const inicioSemana = new Date();
+  inicioSemana.setDate(hoje.getDate() - diff);
+  inicioSemana.setHours(0, 0, 0, 0);
+  const vendasSemanaAgg = await prisma.movimentacao.aggregate({
+    _sum: { valor_total: true },
+    where: {
+      ...baseWhereVendas,
+      criado_em: { gte: inicioSemana },
     },
   });
 
@@ -397,8 +444,11 @@ export async function dashboard(req: Request, res: Response) {
     entradasMes,
     saidasMes,
     receitaMes: receitaMes._sum.valor_total ?? 0,
+    vendasDia: vendasDiaAgg._sum.valor_total ?? 0,
+    vendasSemana: vendasSemanaAgg._sum.valor_total ?? 0,
     estoqueBaixo: itensEstoqueBaixo,
     encomendasAtivasCount,
     encomendasRecentes,
   });
 }
+

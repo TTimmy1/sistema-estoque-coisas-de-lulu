@@ -5,13 +5,14 @@ interface Usuario {
   id: string;
   nome: string;
   email: string;
+  role: string;
 }
 
 interface AuthContextType {
   usuario: Usuario | null;
   token: string | null;
   login: (email: string, senha: string) => Promise<void>;
-  register: (nome: string, email: string, senha: string) => Promise<void>;
+  register: (nome: string, email: string, senha: string, role: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -39,12 +40,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('usuario', JSON.stringify(data.usuario));
   };
 
-  const register = async (nome: string, email: string, senha: string) => {
-    const { data } = await api.post('/auth/register', { nome, email, senha });
-    setToken(data.token);
-    setUsuario(data.usuario);
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('usuario', JSON.stringify(data.usuario));
+  const register = async (nome: string, email: string, senha: string, role: string) => {
+    await api.post('/auth/register', { nome, email, senha, role });
+    // Registro cria conta como PENDENTE — sem login automático
   };
 
   const logout = () => {

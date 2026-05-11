@@ -15,6 +15,7 @@ interface Produto {
   id: string;
   nome: string;
   sku: string;
+  codigo_barras: string | null;
   preco_venda: string;
   custo: string;
   qtd_estoque: number;
@@ -233,7 +234,9 @@ export default function Saida() {
               >
                 <option value="">Selecione um produto</option>
                 {produtos.map((p) => (
-                  <option key={p.id} value={p.id}>{p.nome} ({p.qtd_estoque} un.)</option>
+                  <option key={p.id} value={p.id}>
+                    {p.codigo_barras ? `[${p.codigo_barras}] ` : ''}{p.nome} ({p.qtd_estoque} un.)
+                  </option>
                 ))}
               </select>
             </div>

@@ -9,6 +9,7 @@ interface Produto {
   sku: string;
   custo: string;
   preco_venda: string;
+  codigo_barras: string | null;
   qtd_estoque: number;
   criado_em: string;
   categoria: { nome: string } | null;
@@ -23,7 +24,7 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nome: '', descricao: '', custo: '', preco_venda: '', categoriaId: '' });
+  const [form, setForm] = useState({ nome: '', descricao: '', custo: '', preco_venda: '', categoriaId: '', codigo_barras: '' });
   const [busca, setBusca] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -46,9 +47,10 @@ export default function Produtos() {
         categoriaId: form.categoriaId || null,
         custo: parseFloat(form.custo),
         preco_venda: parseFloat(form.preco_venda),
+        codigo_barras: form.codigo_barras || null,
         qtd_estoque: 0,
       });
-      setForm({ nome: '', descricao: '', custo: '', preco_venda: '', categoriaId: '' });
+      setForm({ nome: '', descricao: '', custo: '', preco_venda: '', categoriaId: '', codigo_barras: '' });
       setShowForm(false);
       fetchProdutos();
     } catch (error) {
@@ -155,6 +157,16 @@ export default function Produtos() {
                 onChange={(e) => setForm({ ...form, custo: e.target.value })}
                 className="input-field"
                 required
+              />
+            </div>
+            <div>
+              <label className="form-label">Código de Barras</label>
+              <input
+                type="text"
+                value={form.codigo_barras}
+                onChange={(e) => setForm({ ...form, codigo_barras: e.target.value })}
+                className="input-field"
+                placeholder="Opcional"
               />
             </div>
             <div>

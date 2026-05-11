@@ -13,6 +13,7 @@ interface Movimentacao {
   criado_em: string;
   produto: { nome: string; sku: string };
   usuario: { nome: string; email: string };
+  vendedor: { nome: string } | null;
 }
 
 const tipoLabel: Record<string, string> = {
@@ -97,6 +98,7 @@ export default function Historico() {
                   <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Valor Unit.</th>
                   <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Desconto</th>
                   <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
+                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Vendedor</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Usuário</th>
                   <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Obs.</th>
                 </tr>
@@ -123,12 +125,13 @@ export default function Historico() {
                       {m.desconto && Number(m.desconto) > 0 ? `-${formatCurrency(m.desconto)}` : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-sm text-gray-800 text-right font-semibold">{formatCurrency(m.valor_total)}</td>
+                    <td className="px-5 py-3.5 text-sm text-gray-500">{m.vendedor ? m.vendedor.nome : '—'}</td>
                     <td className="px-5 py-3.5 text-sm text-gray-500">{m.usuario.nome}</td>
                     <td className="px-5 py-3.5 text-sm text-gray-300 max-w-[150px] truncate">{m.observacao ?? '—'}</td>
                   </tr>
                 ))}
                 {movs.length === 0 && (
-                  <tr><td colSpan={8} className="px-5 py-12 text-center text-gray-300">
+                  <tr><td colSpan={10} className="px-5 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center gap-2">
                       <History className="w-8 h-8" />
                       <span className="text-sm">Nenhuma movimentação encontrada</span>

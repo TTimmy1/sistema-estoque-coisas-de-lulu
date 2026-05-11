@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import {
   Package,
   DollarSign,
@@ -14,8 +15,8 @@ import {
 
 interface DashboardData {
   totalProdutos: number;
-  valorTotalEstoque: number;
-  movimentacoesHoje: number;
+  vendasDia: number;
+  vendasSemana: number;
   entradasMes: number;
   saidasMes: number;
   receitaMes: number;
@@ -34,18 +35,29 @@ interface DashboardData {
 }
 
 export default function Dashboard() {
+  const { usuario } = useAuth();
+  const isAdmin = usuario?.role === 'ADMIN';
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [vendedores, setVendedores] = useState<{id: string; nome: string}[]>([]);
+  const [selectedVendedor, setSelectedVendedor] = useState('');
 
   const fetchDashboard = () => {
-    api.get('/movimentacoes/dashboard')
+    api.get(`/movimentacoes/dashboard${selectedVendedor ? `?vendedorId=${selectedVendedor}` : ''}`)
       .then((r) => setData(r.data))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
+    if (isAdmin) {
+      api.get('/vendedores').then((r) => setVendedores(r.data));
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [selectedVendedor]);
 
   const handleStatusChange = async (encomendaId: string, newStatus: string) => {
     try {
@@ -77,20 +89,22 @@ export default function Dashboard() {
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const stats = [
-    {
-      label: 'Total de Produtos',
-      value: data.totalProdutos.toString(),
-      icon: Package,
-      bg: 'bg-brand-500/10',
-      iconColor: 'text-brand-500',
-    },
-    {
-      label: 'Valor em Estoque',
-      value: formatCurrency(Number(data.valorTotalEstoque)),
-      icon: DollarSign,
-      bg: 'bg-emerald-500/10',
-      iconColor: 'text-emerald-500',
-    },
+    ...(isAdmin ? [
+      {
+        label: 'Total de Produtos',
+        value: data.totalProdutos.toString(),
+        icon: Package,
+        bg: 'bg-brand-500/10',
+        iconColor: 'text-brand-500',
+      },
+      {
+        label: 'Valor em Estoque',
+        value: formatCurrency(Number(data.valorTotalEstoque)),
+        icon: DollarSign,
+        bg: 'bg-emerald-500/10',
+        iconColor: 'text-emerald-500',
+      }
+    ] : []),
     {
       label: 'Movimentações Hoje',
       value: data.movimentacoesHoje.toString(),
@@ -98,13 +112,22 @@ export default function Dashboard() {
       bg: 'bg-blue-500/10',
       iconColor: 'text-blue-500',
     },
-    {
-      label: 'Receita do Mês',
-      value: formatCurrency(Number(data.receitaMes)),
-      icon: TrendingUp,
-      bg: 'bg-violet-500/10',
-      iconColor: 'text-violet-500',
-    },
+    ...(isAdmin ? [
+      {
+        label: 'Vendas Hoje',
+        value: formatCurrency(Number(data.vendasDia)),
+        icon: DollarSign,
+        bg: 'bg-green-500/10',
+        iconColor: 'text-green-500',
+      },
+      {
+        label: 'Vendas Semana',
+        value: formatCurrency(Number(data.vendasSemana)),
+        icon: TrendingUp,
+        bg: 'bg-indigo-500/10',
+        iconColor: 'text-indigo-500',
+      },
+    ] : []),
     {
       label: 'Encomendas Ativas',
       value: data.encomendasAtivasCount.toString(),
@@ -139,8 +162,43 @@ export default function Dashboard() {
       </div>
 
       {/* Two column section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Monthly Summary */}
+{/* Sales Summary Table */}
+<div className="card-section p-6">
+  <div className="flex items-center justify-between mb-5">
+    <h2 className="text-base font-semibold text-gray-800">Resumo de Vendas</h2>
+    {isAdmin && (
+      <select 
+        value={selectedVendedor}
+        onChange={(e) => setSelectedVendedor(e.target.value)}
+        className="input-field text-sm w-48 py-1.5"
+      >
+        <option value="">Todos os vendedores</option>
+        {vendedores.map(v => (
+          <option key={v.id} value={v.id}>{v.nome}</option>
+        ))}
+      </select>
+    )}
+  </div>
+  <table className="w-full text-sm">
+    <tbody>
+      <tr className="border-b">
+        <td className="py-2">Hoje</td>
+        <td className="py-2 text-right font-medium">{formatCurrency(Number(data.vendasDia))}</td>
+      </tr>
+      <tr className="border-b">
+        <td className="py-2">Semana</td>
+        <td className="py-2 text-right font-medium">{formatCurrency(Number(data.vendasSemana))}</td>
+      </tr>
+      <tr>
+        <td className="py-2">Mês</td>
+        <td className="py-2 text-right font-medium">{formatCurrency(Number(data.receitaMes))}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{isAdmin && (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    {/* Monthly Summary */}
         <div className="card-section p-6">
           <h2 className="text-base font-semibold text-gray-800 mb-5">Resumo do Mês</h2>
           <div className="space-y-3">
@@ -192,6 +250,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      )}
 
       {/* Active Orders List */}
       <div className="card-section p-6">

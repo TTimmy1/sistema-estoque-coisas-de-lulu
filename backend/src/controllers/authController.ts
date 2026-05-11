@@ -3,11 +3,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
+import { AuthRequest } from '../middlewares/auth';
 
 const registerSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   email: z.string().email('Email inválido'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  role: z.enum(['ADMIN', 'USER']).optional().default('USER'),
 });
 
 const loginSchema = z.object({
@@ -25,22 +27,19 @@ export async function register(req: Request, res: Response) {
 
   const senhaHash = await bcrypt.hash(data.senha, 10);
 
-  const usuario = await prisma.usuario.create({
+  await prisma.usuario.create({
     data: {
       nome: data.nome,
       email: data.email,
       senha: senhaHash,
+      role: data.role,
+      status: 'PENDENTE',
     },
-    select: { id: true, nome: true, email: true, criado_em: true },
   });
 
-  const token = jwt.sign(
-    { id: usuario.id, nome: usuario.nome, email: usuario.email },
-    process.env.JWT_SECRET as string,
-    { expiresIn: '8h' }
-  );
-
-  return res.status(201).json({ usuario, token });
+  return res.status(201).json({
+    message: 'Solicitação enviada! Aguarde a aprovação de um administrador para acessar o sistema.',
+  });
 }
 
 export async function login(req: Request, res: Response) {
@@ -56,8 +55,16 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ error: 'Credenciais inválidas' });
   }
 
+  if (usuario.status === 'PENDENTE') {
+    return res.status(403).json({ error: 'Sua conta ainda está aguardando aprovação de um administrador.' });
+  }
+
+  if (usuario.status === 'REJEITADO') {
+    return res.status(403).json({ error: 'Sua solicitação de acesso foi recusada. Entre em contato com um administrador.' });
+  }
+
   const token = jwt.sign(
-    { id: usuario.id, nome: usuario.nome, email: usuario.email },
+    { id: usuario.id, nome: usuario.nome, email: usuario.email, role: usuario.role },
     process.env.JWT_SECRET as string,
     { expiresIn: '8h' }
   );
@@ -67,6 +74,7 @@ export async function login(req: Request, res: Response) {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
+      role: usuario.role,
     },
     token,
   });
@@ -74,4 +82,47 @@ export async function login(req: Request, res: Response) {
 
 export async function me(req: Request, res: Response) {
   return res.json({ usuario: req.params });
+}
+
+// ─── Admin: listar contas pendentes ──────────────────────
+
+export async function listarPendentes(req: AuthRequest, res: Response) {
+  const usuario = req.usuario as any;
+  if (usuario?.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+
+  const pendentes = await prisma.usuario.findMany({
+    where: { status: 'PENDENTE' },
+    select: { id: true, nome: true, email: true, role: true, criado_em: true },
+    orderBy: { criado_em: 'asc' },
+  });
+
+  return res.json(pendentes);
+}
+
+// ─── Admin: aprovar ou rejeitar conta ────────────────────
+
+export async function gerenciarConta(req: AuthRequest, res: Response) {
+  const usuario = req.usuario as any;
+  if (usuario?.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+
+  const { id } = req.params;
+  const { acao } = req.body; // 'APROVAR' ou 'REJEITAR'
+
+  if (!['APROVAR', 'REJEITAR'].includes(acao)) {
+    return res.status(400).json({ error: 'Ação inválida. Use APROVAR ou REJEITAR.' });
+  }
+
+  const novoStatus = acao === 'APROVAR' ? 'ATIVO' : 'REJEITADO';
+
+  const atualizado = await prisma.usuario.update({
+    where: { id },
+    data: { status: novoStatus },
+    select: { id: true, nome: true, email: true, role: true, status: true },
+  });
+
+  return res.json(atualizado);
 }
