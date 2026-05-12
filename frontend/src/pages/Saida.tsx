@@ -1,4 +1,5 @@
 import { useEffect, useState, FormEvent } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import api from '../services/api';
 import { 
   ArrowUpCircle, 
@@ -75,7 +76,7 @@ export default function Saida() {
       setCart(newCart);
     } else {
       const newItem: CartItem = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         produtoId: produto.id,
         nome: produto.nome,
         quantidade: qtd,
