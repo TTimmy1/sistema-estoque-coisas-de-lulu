@@ -53,7 +53,7 @@ export async function index(req: Request, res: Response) {
 }
 
 export async function show(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const lojaId = req.headers['x-loja-id'] as string;
 
   const produto = await prisma.produto.findUnique({
@@ -113,7 +113,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const data = updateSchema.parse(req.body);
   const lojaId = req.headers['x-loja-id'] as string;
 
@@ -132,7 +132,7 @@ export async function update(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const lojaId = req.headers['x-loja-id'] as string;
 
   const produto = await prisma.produto.findUnique({ where: { id } });

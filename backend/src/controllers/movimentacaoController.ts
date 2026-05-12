@@ -291,7 +291,7 @@ export async function index(req: Request, res: Response) {
 // ─── Detalhes de uma Movimentação ────────────────────────
 
 export async function show(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
 
   const lojaId = req.headers['x-loja-id'] as string;
 

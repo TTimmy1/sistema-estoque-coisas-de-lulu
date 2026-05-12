@@ -109,7 +109,7 @@ export async function gerenciarConta(req: AuthRequest, res: Response) {
     return res.status(403).json({ error: 'Acesso negado' });
   }
 
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { acao } = req.body; // 'APROVAR' ou 'REJEITAR'
 
   if (!['APROVAR', 'REJEITAR'].includes(acao)) {

@@ -63,7 +63,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const data = updateSchema.parse(req.body);
   const lojaId = req.headers['x-loja-id'] as string;
 
@@ -94,7 +94,7 @@ export async function update(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const lojaId = req.headers['x-loja-id'] as string;
 
   const current = await prisma.encomenda.findUnique({ where: { id } });

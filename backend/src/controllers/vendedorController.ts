@@ -52,7 +52,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const data = createSchema.parse(req.body);
 
   const existe = await prisma.vendedor.findUnique({ where: { nome: data.nome } });
@@ -68,7 +68,7 @@ export async function update(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   
   // Verify if it has any movements
   const count = await prisma.movimentacao.count({ where: { vendedorId: id } });

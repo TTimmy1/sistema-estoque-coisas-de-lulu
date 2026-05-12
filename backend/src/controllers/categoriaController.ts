@@ -28,7 +28,7 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function update(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const data = createSchema.parse(req.body);
 
   const existe = await prisma.categoria.findUnique({ where: { nome: data.nome } });
@@ -44,7 +44,7 @@ export async function update(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  const { id } = req.params;
+  const id = req.params.id as string;
   await prisma.categoria.delete({ where: { id } });
   return res.status(204).send();
 }
