@@ -321,11 +321,14 @@ export async function dashboard(req: AuthRequest, res: Response) {
   }
 
   // Totais gerais
-  const totalProdutos = await prisma.produto.count({ where: { lojaId } });
-  const valorEstoque = await prisma.produto.aggregate({
-    _sum: { custo: true },
+  const produtosNaLoja = await prisma.produto.findMany({
     where: { lojaId },
+    select: { qtd_estoque: true, custo: true, preco_venda: true },
   });
+
+  const totalProdutos = produtosNaLoja.reduce((acc, p) => acc + p.qtd_estoque, 0);
+  const valorTotalEstoque = produtosNaLoja.reduce((acc, p) => acc + (Number(p.custo) * p.qtd_estoque), 0);
+  const valorTotalVendaEstoque = produtosNaLoja.reduce((acc, p) => acc + (Number(p.preco_venda) * p.qtd_estoque), 0);
 
   const movimentacoesHoje = await prisma.movimentacao.count({
     where: {
@@ -439,7 +442,8 @@ export async function dashboard(req: AuthRequest, res: Response) {
 
   return res.json({
     totalProdutos,
-    valorTotalEstoque: valorEstoque._sum.custo ?? 0,
+    valorTotalEstoque,
+    valorTotalVendaEstoque,
     movimentacoesHoje,
     entradasMes,
     saidasMes,

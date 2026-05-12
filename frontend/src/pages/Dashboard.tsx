@@ -20,6 +20,9 @@ interface DashboardData {
   entradasMes: number;
   saidasMes: number;
   receitaMes: number;
+  valorTotalEstoque: number;
+  valorTotalVendaEstoque: number;
+  movimentacoesHoje: number; // Added this too since it's used
   estoqueBaixo: Array<{ id: string; nome: string; sku: string; qtd_estoque: number }>;
   encomendasAtivasCount: number;
   encomendasRecentes: Array<{
@@ -97,14 +100,21 @@ export default function Dashboard() {
         bg: 'bg-brand-500/10',
         iconColor: 'text-brand-500',
       },
-      {
-        label: 'Valor em Estoque',
-        value: formatCurrency(Number(data.valorTotalEstoque)),
-        icon: DollarSign,
-        bg: 'bg-emerald-500/10',
-        iconColor: 'text-emerald-500',
-      }
-    ] : []),
+        {
+          label: 'Valor de Custo em Estoque',
+          value: formatCurrency(Number(data.valorTotalEstoque)),
+          icon: DollarSign,
+          bg: 'bg-emerald-500/10',
+          iconColor: 'text-emerald-500',
+        },
+        {
+          label: 'Valor de Venda em Estoque',
+          value: formatCurrency(Number(data.valorTotalVendaEstoque)),
+          icon: TrendingUp,
+          bg: 'bg-brand-500/10',
+          iconColor: 'text-brand-500',
+        }
+      ] : []),
     {
       label: 'Movimentações Hoje',
       value: data.movimentacoesHoje.toString(),

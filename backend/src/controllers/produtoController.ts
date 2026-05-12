@@ -145,6 +145,15 @@ export async function remove(req: Request, res: Response) {
     return res.status(400).json({ error: 'Não é possível excluir produto com estoque positivo' });
   } */
 
-  await prisma.produto.delete({ where: { id } });
+  // Para evitar erro de chave estrangeira, tratamos os registros vinculados
+  await prisma.$transaction([
+    // Deletamos as movimentações vinculadas (histórico de estoque do produto)
+    prisma.movimentacao.deleteMany({ where: { produtoId: id } }),
+    // Desvinculamos o produto de encomendas (mantendo o registro da encomenda)
+    prisma.encomenda.updateMany({ where: { produtoId: id }, data: { produtoId: null } }),
+    // Finalmente deletamos o produto
+    prisma.produto.delete({ where: { id } }),
+  ]);
+
   return res.status(204).send();
 }

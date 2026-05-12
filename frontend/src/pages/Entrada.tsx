@@ -1,18 +1,19 @@
 import { useEffect, useState, FormEvent } from 'react';
 import api from '../services/api';
-import { ArrowDownCircle, CheckCircle, AlertCircle, Package } from 'lucide-react';
+import { ArrowDownCircle, CheckCircle, AlertCircle, Tag } from 'lucide-react';
 
 interface Produto {
   id: string;
   nome: string;
   sku: string;
   custo: string;
+  preco_venda: string;
   qtd_estoque: number;
 }
 
 export default function Entrada() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [form, setForm] = useState({ produtoId: '', quantidade: '', custo: '', observacao: '' });
+  const [form, setForm] = useState({ produtoId: '', quantidade: '', observacao: '' });
   const [msg, setMsg] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
 
@@ -30,14 +31,11 @@ export default function Entrada() {
       quantidade: parseInt(form.quantidade, 10),
       observacao: form.observacao || undefined,
     };
-    if (form.custo) {
-      payload.custo = parseFloat(form.custo);
-    }
 
     try {
       await api.post('/movimentacoes/entrada', payload);
       setMsg({ text: 'Entrada registrada com sucesso!', type: 'success' });
-      setForm({ produtoId: '', quantidade: '', custo: '', observacao: '' });
+      setForm({ produtoId: '', quantidade: '', observacao: '' });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erro ao registrar entrada';
       setMsg({ text: message, type: 'error' });
@@ -47,8 +45,8 @@ export default function Entrada() {
   };
 
   const produtoSelecionado = produtos.find((p) => p.id === form.produtoId);
-  const total = produtoSelecionado && form.quantidade
-    ? (form.custo ? parseFloat(form.custo) : Number(produtoSelecionado.custo)) * parseInt(form.quantidade, 10)
+  const totalVenda = produtoSelecionado && form.quantidade
+    ? Number(produtoSelecionado.preco_venda) * parseInt(form.quantidade, 10)
     : 0;
 
   return (
@@ -91,7 +89,7 @@ export default function Entrada() {
         </div>
 
         {produtoSelecionado && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="form-label">Quantidade *</label>
               <input
@@ -103,35 +101,24 @@ export default function Entrada() {
                 required
               />
             </div>
-            <div>
-              <label className="form-label">Custo Unitário (R$)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder={Number(produtoSelecionado.custo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                value={form.custo}
-                onChange={(e) => setForm({ ...form, custo: e.target.value })}
-                className="input-field"
-              />
-              <p className="text-xs text-gray-400 mt-1">Deixe vazio para usar o custo atual</p>
-            </div>
           </div>
         )}
 
         {produtoSelecionado && form.quantidade && (
-          <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-              <Package className="w-5 h-5 text-emerald-500" />
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center">
+              <Tag className="w-5 h-5 text-blue-500" />
             </div>
             <div>
-              <p className="text-sm text-emerald-700">
-                <strong>Total:</strong> {total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              <p className="text-sm text-blue-700">
+                <strong>Valor Total de Venda:</strong> {totalVenda.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </p>
-              <p className="text-xs text-emerald-500">Custo unitário: {(form.custo ? parseFloat(form.custo) : Number(produtoSelecionado.custo)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+              <p className="text-xs text-blue-500">Preço de venda unitário: {Number(produtoSelecionado.preco_venda).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
             </div>
           </div>
         )}
+
+
 
         <div>
           <label className="form-label">Observação</label>
