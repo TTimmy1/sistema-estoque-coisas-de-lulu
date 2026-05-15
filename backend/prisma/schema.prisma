@@ -48,11 +48,12 @@ model Categoria {
 model Produto {
   id            String         @id @default(cuid())
   nome          String
-  sku           String         @unique
+  sku           String         
   custo         Float
   preco_venda   Float
   codigo_barras String?
   qtd_estoque   Int            @default(0)
+  estoque_minimo Int            @default(5)
   categoriaId   String?
   lojaId        String?
   criado_em     DateTime       @default(now())
@@ -60,6 +61,8 @@ model Produto {
   encomendas    Encomenda[]
   categoria     Categoria?     @relation(fields: [categoriaId], references: [id])
   loja          Loja?          @relation(fields: [lojaId], references: [id])
+
+  @@unique([sku, lojaId])
 }
 
 model Movimentacao {

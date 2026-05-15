@@ -10,6 +10,7 @@ import movimentacaoRoutes from './routes/movimentacao.routes';
 import categoriaRoutes from './routes/categoria.routes';
 import vendedorRoutes from './routes/vendedor.routes';
 import encomendaRoutes from './routes/encomenda.routes';
+import transferenciaRoutes from './routes/transferencia.routes';
 import { lojaRoutes } from './routes/loja.routes';
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/movimentacoes', movimentacaoRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/vendedores', vendedorRoutes);
 app.use('/api/encomendas', encomendaRoutes);
+app.use('/api/transferencia', transferenciaRoutes);
 app.use('/api/lojas', lojaRoutes);
 
 // ─── Error Handler ──────────────────────────────────────

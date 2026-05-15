@@ -4,21 +4,23 @@ import { prisma } from '../utils/prisma';
 
 const createSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
-  sku: z.string().min(1, 'SKU é obrigatório').optional(),
+  sku: z.string().optional().transform(v => v === "" ? undefined : v),
   categoriaId: z.string().cuid().optional().nullable(),
   custo: z.coerce.number().positive('Custo deve ser positivo'),
   preco_venda: z.coerce.number().positive('Preço de venda deve ser positivo'),
   codigo_barras: z.string().optional().nullable(),
   qtd_estoque: z.coerce.number().int().nonnegative().default(0),
+  estoque_minimo: z.coerce.number().int().nonnegative().default(5),
 });
 
 const updateSchema = z.object({
   nome: z.string().min(1).optional(),
-  sku: z.string().min(1).optional(),
+  sku: z.string().optional().transform(v => v === "" ? undefined : v),
   categoriaId: z.string().cuid().optional().nullable(),
   custo: z.coerce.number().positive().optional(),
   preco_venda: z.coerce.number().positive().optional(),
   codigo_barras: z.string().optional().nullable(),
+  estoque_minimo: z.coerce.number().int().nonnegative().optional(),
 });
 
 export async function index(req: Request, res: Response) {
@@ -88,28 +90,54 @@ function gerarSku(nome: string): string {
 
 export async function create(req: Request, res: Response) {
   const data = createSchema.parse(req.body);
-  const sku = gerarSku(data.nome);
-  const lojaId = req.headers['x-loja-id'] as string;
+  const sku = data.sku || gerarSku(data.nome);
+  const lojaOrigemId = req.headers['x-loja-id'] as string;
 
-  if (!lojaId) {
+  if (!lojaOrigemId) {
     return res.status(400).json({ error: 'Loja não informada (x-loja-id ausente)' });
   }
 
-  const produto = await prisma.produto.create({
-    data: {
-      nome: data.nome,
-      sku,
-      categoriaId: data.categoriaId,
-      custo: data.custo,
-      preco_venda: data.preco_venda,
-      codigo_barras: data.codigo_barras,
-      qtd_estoque: data.qtd_estoque,
-      lojaId,
-    },
-    include: { categoria: true },
-  });
+  // 1. Buscar todas as lojas cadastradas
+  const lojas = await prisma.loja.findMany();
 
-  return res.status(201).json(produto);
+  // 2. Criar em todas as lojas
+  const resultados = await Promise.all(
+    lojas.map(async (loja) => {
+      // Verificar se já existe esse SKU nessa loja específica
+      const existente = await prisma.produto.findUnique({
+        where: {
+          sku_lojaId: {
+            sku,
+            lojaId: loja.id,
+          },
+        },
+      });
+
+      if (existente) {
+        // Se já existe na loja ativa, retorna ele. Nas outras lojas, ignora.
+        return existente;
+      }
+
+      return prisma.produto.create({
+        data: {
+          nome: data.nome,
+          sku,
+          categoriaId: data.categoriaId,
+          custo: data.custo,
+          preco_venda: data.preco_venda,
+          codigo_barras: data.codigo_barras,
+          qtd_estoque: loja.id === lojaOrigemId ? data.qtd_estoque : 0,
+          estoque_minimo: data.estoque_minimo,
+          lojaId: loja.id,
+        },
+      });
+    })
+  );
+
+  // Retornar o produto da loja que solicitou o cadastro
+  const produtoPrincipal = resultados.find((p) => p.lojaId === lojaOrigemId);
+
+  return res.status(201).json(produtoPrincipal);
 }
 
 export async function update(req: Request, res: Response) {
@@ -121,6 +149,11 @@ export async function update(req: Request, res: Response) {
   if (!produto || produto.lojaId !== lojaId) {
     return res.status(404).json({ error: 'Produto não encontrado' });
   }
+
+  // Se o usuário estiver editando dados básicos (nome, preço, categoria),
+  // talvez ele queira atualizar em todas as unidades?
+  // O usuário não pediu isso explicitamente, mas é uma boa prática.
+  // Por enquanto, vou atualizar apenas na unidade atual para evitar efeitos colaterais.
 
   const atualizado = await prisma.produto.update({
     where: { id },
@@ -140,18 +173,9 @@ export async function remove(req: Request, res: Response) {
     return res.status(404).json({ error: 'Produto não encontrado' });
   }
 
-  /* Removido o bloqueio por estoque para atender a solicitação de apagar quando quiser */
-  /* if (produto.qtd_estoque > 0) {
-    return res.status(400).json({ error: 'Não é possível excluir produto com estoque positivo' });
-  } */
-
-  // Para evitar erro de chave estrangeira, tratamos os registros vinculados
   await prisma.$transaction([
-    // Deletamos as movimentações vinculadas (histórico de estoque do produto)
     prisma.movimentacao.deleteMany({ where: { produtoId: id } }),
-    // Desvinculamos o produto de encomendas (mantendo o registro da encomenda)
     prisma.encomenda.updateMany({ where: { produtoId: id }, data: { produtoId: null } }),
-    // Finalmente deletamos o produto
     prisma.produto.delete({ where: { id } }),
   ]);
 
