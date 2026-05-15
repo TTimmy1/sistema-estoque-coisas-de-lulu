@@ -123,7 +123,7 @@ export default function Saida() {
             produtoId: item.produtoId,
             quantidade: item.quantidade,
             tipo: 'SAIDA_DESCARTE',
-            observacao: form.observacao || undefined,
+            observacao: item.observacao || form.observacao || undefined,
           });
         }
       }
@@ -166,26 +166,26 @@ export default function Saida() {
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
-              <ArrowUpCircle className="w-5 h-5 text-red-500" />
+          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
+              <ArrowUpCircle className="w-6 h-6 text-rose-500" />
             </div>
             Registrar Saída
           </h1>
-          <p className="text-sm text-gray-400 mt-1">Gerencie vendas e baixas de estoque</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Gerencie vendas e baixas de estoque com facilidade.</p>
         </div>
 
         {/* Tabs Switcher */}
-        <div className="flex bg-gray-100 p-1 rounded-xl w-fit self-start sm:self-center">
+        <div className="flex bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-2xl w-fit">
           <button
             onClick={() => setForm({ ...form, tipo: 'SAIDA_VENDA' })}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+            className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${
               form.tipo === 'SAIDA_VENDA'
-                ? 'bg-white text-brand-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             🛒 Venda
@@ -195,10 +195,10 @@ export default function Saida() {
               setCart([]);
               setForm({ ...form, tipo: 'SAIDA_DESCARTE', descontoTotal: '', vendedorId: '', telefone_cliente: '' });
             }}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${
+            className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all ${
               form.tipo === 'SAIDA_DESCARTE'
-                ? 'bg-white text-red-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white dark:bg-slate-700 text-rose-600 dark:text-rose-400 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             ♻️ Descarte
@@ -207,35 +207,37 @@ export default function Saida() {
       </div>
 
       {msg.text && (
-        <div className={`flex items-center gap-3 p-4 rounded-xl text-sm border animate-in fade-in slide-in-from-top-2 duration-300 ${
+        <div className={`flex items-center gap-3 p-5 rounded-2xl text-sm font-bold border animate-in fade-in slide-in-from-top-4 duration-500 ${
           msg.type === 'success'
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-            : 'bg-red-50 text-red-700 border-red-200'
+            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+            : 'bg-rose-500/10 text-rose-600 border-rose-500/20'
         }`}>
-          {msg.type === 'success' ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+          {msg.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
           {msg.text}
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
         {/* Adicionar Produto */}
-        <div className="card-section p-6 space-y-5">
-          <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-brand-500" />
+        <div className="card-section space-y-6">
+          <h2 className="text-lg font-bold flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-brand-500" />
+            </div>
             Adicionar Item
           </h2>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="form-label text-xs">Produto</label>
+              <label className="form-label">Produto</label>
               <select
                 value={form.produtoId}
                 onChange={(e) => setForm({ ...form, produtoId: e.target.value })}
-                className="input-field text-sm"
+                className="input-field"
               >
-                <option value="">Selecione um produto</option>
+                <option value="" className="dark:bg-slate-900">Selecione um produto</option>
                 {produtos.map((p) => (
-                  <option key={p.id} value={p.id}>
+                  <option key={p.id} value={p.id} className="dark:bg-slate-900">
                     {p.codigo_barras ? `[${p.codigo_barras}] ` : ''}{p.nome} ({p.qtd_estoque} un.)
                   </option>
                 ))}
@@ -244,21 +246,21 @@ export default function Saida() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="form-label text-xs">Quantidade</label>
+                <label className="form-label">Quantidade</label>
                 <input
                   type="number"
                   min="1"
                   max={produtoSelecionado?.qtd_estoque}
                   value={form.quantidade}
                   onChange={(e) => setForm({ ...form, quantidade: e.target.value })}
-                  className="input-field text-sm"
+                  className="input-field"
                   placeholder="0"
                 />
               </div>
               <div>
-                <label className="form-label text-xs">Preço Unit.</label>
-                <div className="input-field bg-gray-50 text-gray-400 text-sm flex items-center gap-1">
-                  {precoExibido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                <label className="form-label">Preço Unit.</label>
+                <div className="input-field bg-slate-50 dark:bg-slate-800/50 text-slate-400 font-bold flex items-center">
+                  {formatCurrency(precoExibido)}
                 </div>
               </div>
             </div>
@@ -267,65 +269,73 @@ export default function Saida() {
               type="button"
               onClick={addToCart}
               disabled={!form.produtoId || !form.quantidade}
-              className="w-full py-3 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale"
+              className="w-full py-4 bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-500/20 font-black rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-30 disabled:grayscale"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               Adicionar ao Carrinho
             </button>
           </div>
         </div>
 
         {/* Carrinho */}
-        <div className="xl:col-span-2 space-y-6">
-          <div className="card-section p-0 overflow-hidden min-h-[300px]">
-             <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-white sticky top-0 z-10">
-               <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                 <ShoppingBag className="w-4 h-4 text-emerald-500" />
-                 Itens no Carrinho ({cart.length})
+        <div className="xl:col-span-2 space-y-8">
+          <div className="table-container min-h-[400px] flex flex-col">
+             <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl sticky top-0 z-10">
+               <h2 className="text-lg font-bold flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                   <ShoppingBag className="w-5 h-5 text-emerald-500" />
+                 </div>
+                 Carrinho ({cart.length})
                </h2>
-               <span className="text-sm font-black text-emerald-600">
-                 {totalCarrinho.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-               </span>
+               <div className="text-right">
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Subtotal</p>
+                 <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                   {formatCurrency(totalCarrinho)}
+                 </span>
+               </div>
              </div>
 
              {cart.length === 0 ? (
-               <div className="flex flex-col items-center justify-center h-64 text-gray-300">
-                 <ShoppingBag className="w-12 h-12 mb-3 opacity-20" />
-                 <p className="text-sm font-medium">O carrinho está vazio</p>
+               <div className="flex-1 flex flex-col items-center justify-center py-20 text-slate-300 dark:text-slate-800">
+                 <ShoppingBag className="w-20 h-20 mb-4 opacity-20" />
+                 <p className="text-lg font-bold">O carrinho está vazio</p>
+                 <p className="text-sm font-medium opacity-60">Adicione produtos para começar a venda</p>
                </div>
              ) : (
                <div className="overflow-x-auto">
                  <table className="w-full text-left">
-                   <thead className="bg-gray-50/50 text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                   <thead className="table-header">
                      <tr>
-                       <th className="px-6 py-3">Produto</th>
-                       <th className="px-6 py-3 text-right">Qtd</th>
-                       <th className="px-6 py-3 text-right">Unitário</th>
-                       <th className="px-6 py-3 text-right">Total</th>
-                       <th className="px-6 py-3"></th>
+                       <th className="table-th">Produto</th>
+                       <th className="table-th text-right">Qtd</th>
+                       <th className="table-th text-right">Unitário</th>
+                       <th className="table-th text-right">Total</th>
+                       <th className="table-th"></th>
                      </tr>
                    </thead>
-                   <tbody className="divide-y divide-gray-50">
+                   <tbody className="table-tbody">
                      {cart.map((item) => (
-                       <tr key={item.id} className="hover:bg-gray-50/30 transition-colors group">
-                         <td className="px-6 py-4">
-                           <p className="text-sm font-semibold text-gray-800">{item.nome}</p>
+                       <tr key={item.id} className="table-tr group">
+                         <td className="table-td">
+                           <p className="table-td-text">{item.nome}</p>
                          </td>
-                         <td className="px-6 py-4 text-right text-sm font-bold text-gray-600">
+                         <td className="table-td text-right font-black text-slate-600 dark:text-slate-300">
                            {item.quantidade}
                          </td>
-                         <td className="px-6 py-4 text-right text-sm text-gray-500">
-                           {item.precoUnitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         <td className="table-td text-right table-td-subtext font-medium">
+                           {formatCurrency(item.precoUnitario)}
                          </td>
-                         <td className="px-6 py-4 text-right text-sm font-extrabold text-emerald-600">
-                           {(item.precoUnitario * item.quantidade).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                         <td className="table-td text-right">
+                           <span className="font-black text-emerald-600 dark:text-emerald-400">
+                             {formatCurrency(item.precoUnitario * item.quantidade)}
+                           </span>
                          </td>
-                         <td className="px-6 py-4 text-right">
+                         <td className="table-td text-right">
                            <button
                              onClick={() => removeFromCart(item.id)}
-                             className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                             className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"
                            >
-                             <Trash2 className="w-4 h-4" />
+                             <Trash2 className="w-5 h-5" />
                            </button>
                          </td>
                        </tr>
@@ -338,31 +348,31 @@ export default function Saida() {
 
           {/* Dados da Venda */}
           {cart.length > 0 && (
-            <div className="card-section p-6 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="card-section animate-in slide-in-from-bottom-8 duration-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {form.tipo === 'SAIDA_VENDA' && (
                   <>
                     <div>
-                      <label className="form-label text-xs">Vendedor(a) *</label>
+                      <label className="form-label">Vendedor(a) *</label>
                       <select
                         value={form.vendedorId}
                         onChange={(e) => setForm({ ...form, vendedorId: e.target.value })}
-                        className="input-field text-sm"
+                        className="input-field font-bold"
                         required
                       >
-                        <option value="">Selecione um vendedor</option>
+                        <option value="" className="dark:bg-slate-900">Selecione um vendedor</option>
                         {vendedores.map((v) => (
-                          <option key={v.id} value={v.id}>{v.nome}</option>
+                          <option key={v.id} value={v.id} className="dark:bg-slate-900">{v.nome}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="form-label text-xs">Telefone do Cliente</label>
+                      <label className="form-label">Telefone do Cliente</label>
                       <input
                         type="text"
                         value={form.telefone_cliente}
                         onChange={(e) => setForm({ ...form, telefone_cliente: e.target.value })}
-                        className="input-field text-sm"
+                        className="input-field font-bold"
                         placeholder="(00) 00000-0000"
                       />
                     </div>
@@ -370,21 +380,21 @@ export default function Saida() {
                 )}
                 
                 <div className="md:col-span-2">
-                   <label className="form-label text-xs">Observação</label>
+                   <label className="form-label">Observação</label>
                    <textarea
-                    rows={1}
+                    rows={2}
                     value={form.observacao}
                     onChange={(e) => setForm({ ...form, observacao: e.target.value })}
-                    className="input-field text-sm resize-none"
-                    placeholder="Notas extras..."
+                    className="input-field resize-none font-medium"
+                    placeholder="Notas extras sobre esta saída..."
                   />
                 </div>
 
                 {form.tipo === 'SAIDA_VENDA' && (
-                  <div className="md:col-span-2 pt-4 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="w-full md:w-48">
-                      <label className="form-label text-xs text-brand-600 font-bold">Desconto Total (%)</label>
-                      <div className="relative">
+                  <div className="md:col-span-2 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="w-full md:w-64">
+                      <label className="form-label text-brand-600 dark:text-brand-400">Aplicar Desconto (%)</label>
+                      <div className="relative group">
                         <input
                           type="number"
                           step="0.1"
@@ -392,21 +402,22 @@ export default function Saida() {
                           max="100"
                           value={form.descontoTotal}
                           onChange={(e) => setForm({ ...form, descontoTotal: e.target.value })}
-                          className="input-field pr-9 border-brand-100 focus:border-brand-500 text-sm font-bold"
+                          className="input-field pr-12 border-brand-500/20 focus:border-brand-500 font-black text-lg"
                           placeholder="0"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xl">%</span>
                       </div>
                     </div>
  
                     <div className="text-center md:text-right">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total a Pagar</p>
-                      <div className="text-4xl font-black text-gray-900 flex items-baseline gap-2 justify-center md:justify-end">
-                        {totalComDesconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-2">Total Final</p>
+                      <div className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
+                        {formatCurrency(totalComDesconto)}
                       </div>
                       {valorDesconto > 0 && (
-                        <p className="text-xs font-bold text-emerald-500">
-                          - {valorDesconto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} de desconto
+                        <p className="text-sm font-bold text-emerald-500 mt-2 flex items-center justify-center md:justify-end gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Economia de {formatCurrency(valorDesconto)}
                         </p>
                       )}
                     </div>
@@ -414,22 +425,26 @@ export default function Saida() {
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={loading}
-                className={`btn-primary w-full py-4 text-lg font-black tracking-tight shadow-xl flex items-center justify-center gap-3 transition-all transform active:scale-[0.98]
-                  ${form.tipo === 'SAIDA_DESCARTE' ? 'from-red-600 to-red-700 shadow-red-200' : 'from-brand-600 to-brand-700 shadow-brand-200'}`}
-              >
-                {loading ? (
-                  <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    Finalizar {form.tipo === 'SAIDA_VENDA' ? 'Venda' : 'Baixa'}
-                  </>
-                )}
-              </button>
+              <div className="pt-8 mt-8 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className={`w-full py-5 text-xl font-black tracking-tight shadow-2xl flex items-center justify-center gap-4 transition-all transform active:scale-[0.98] rounded-2xl
+                    ${form.tipo === 'SAIDA_DESCARTE' 
+                      ? 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-500/20' 
+                      : 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/20'}`}
+                >
+                  {loading ? (
+                    <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="w-6 h-6" />
+                      Finalizar {form.tipo === 'SAIDA_VENDA' ? 'Venda' : 'Baixa de Descarte'}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           )}
         </div>

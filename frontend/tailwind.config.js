@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -15,6 +16,7 @@ export default {
           700: '#be123c',
           800: '#9f1239',
           900: '#881337',
+          950: '#4a0418',
         },
         sidebar: {
           50: '#fef1f3',
@@ -25,6 +27,14 @@ export default {
           900: '#881337',
           950: '#4a0418',
         },
+        dark: {
+          50: '#0f172a',
+          100: '#1e293b',
+          200: '#334155',
+          300: '#475569',
+          400: '#64748b',
+          500: '#94a3b8',
+        }
       },
     },
   },

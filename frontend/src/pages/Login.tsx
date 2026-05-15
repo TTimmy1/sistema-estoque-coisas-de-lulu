@@ -22,20 +22,20 @@ export default function Login({ onSwitchToRegister }: { onSwitchToRegister: () =
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 via-white to-brand-50 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo area */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500 shadow-lg shadow-brand-500/30 mb-4">
-            <Package className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Controle de Estoque</h1>
-          <p className="text-gray-400 text-sm mt-1">Faça login para continuar</p>
+return (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 via-white to-brand-50 p-4 dark:from-dark-50 dark:via-dark-100 dark:to-dark-50">
+    <div className="w-full max-w-md">
+      {/* Logo area */}
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500 shadow-lg shadow-brand-500/30 mb-4">
+          <Package className="w-7 h-7 text-white" />
         </div>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Controle de Estoque</h1>
+        <p className="text-gray-400 text-sm mt-1 dark:text-gray-500">Faça login para continuar</p>
+      </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8">
+      {/* Card */}
+      <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8 dark:bg-dark-100 dark:shadow-none dark:border-dark-200">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="form-label">Email</label>
@@ -65,28 +65,28 @@ export default function Login({ onSwitchToRegister }: { onSwitchToRegister: () =
                 />
               </div>
             </div>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary justify-center py-2.5 text-base"
-            >
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center mt-6 text-sm text-gray-500">
-          Não tem conta?{' '}
-          <button onClick={onSwitchToRegister} className="text-brand-500 hover:text-brand-600 font-medium">
-            Registrar
-          </button>
-        </p>
-      </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+            {error}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full btn-primary justify-center py-2.5 text-base"
+        >
+          {loading ? 'Entrando...' : 'Entrar'}
+        </button>
+      </form>
     </div>
-  );
+
+    <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
+      Não tem conta?{' '}
+      <button onClick={onSwitchToRegister} className="text-brand-500 hover:text-brand-600 font-medium dark:hover:text-brand-400">
+        Registrar
+      </button>
+    </p>
+  </div>
+</div>
+);
 }

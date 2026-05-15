@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../services/api';
-import { History, ChevronLeft, ChevronRight } from 'lucide-react';
+import { History, ChevronLeft, ChevronRight, Filter, Download } from 'lucide-react';
 
 interface Movimentacao {
   id: string;
@@ -20,12 +20,6 @@ const tipoLabel: Record<string, string> = {
   ENTRADA: 'Entrada',
   SAIDA_VENDA: 'Venda',
   SAIDA_DESCARTE: 'Descarte',
-};
-
-const tipoBadge: Record<string, string> = {
-  ENTRADA: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
-  SAIDA_VENDA: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200',
-  SAIDA_DESCARTE: 'bg-red-50 text-red-700 ring-1 ring-red-200',
 };
 
 export default function Historico() {
@@ -54,116 +48,139 @@ export default function Historico() {
     });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center">
-            <History className="w-5 h-5 text-brand-500" />
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
+              <History className="w-6 h-6 text-brand-500" />
+            </div>
+            Histórico de Movimentações
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Auditoria completa de entradas e saídas.</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <select
+              value={filtroTipo}
+              onChange={(e) => { setFiltroTipo(e.target.value); setPagina(1); }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+            >
+              <option value="">Todos os tipos</option>
+              <option value="ENTRADA">Apenas Entradas</option>
+              <option value="SAIDA_VENDA">Apenas Vendas</option>
+              <option value="SAIDA_DESCARTE">Apenas Descartes</option>
+            </select>
           </div>
-          Histórico de Movimentações
-        </h1>
-        <p className="text-sm text-gray-400 mt-1">Acompanhe todas as entradas e saídas</p>
+          <button className="btn-secondary px-4 py-2.5">
+            <Download className="w-4 h-4" />
+            Exportar
+          </button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-3">
-        <select
-          value={filtroTipo}
-          onChange={(e) => { setFiltroTipo(e.target.value); setPagina(1); }}
-          className="input-field w-auto"
-        >
-          <option value="">Todos os tipos</option>
-          <option value="ENTRADA">Entrada</option>
-          <option value="SAIDA_VENDA">Venda</option>
-          <option value="SAIDA_DESCARTE">Descarte</option>
-        </select>
-      </div>
-
-      {/* Table */}
+      {/* Table Section */}
       {loading ? (
-        <div className="flex items-center justify-center h-40">
-          <div className="animate-spin w-6 h-6 border-3 border-brand-500 border-t-transparent rounded-full"></div>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin w-8 h-8 border-4 border-brand-500 border-t-transparent rounded-full"></div>
         </div>
       ) : (
-        <>
-          <div className="card-section overflow-hidden">
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[800px]">
-              <thead className="bg-gray-50/80 border-b border-gray-100">
-                <tr>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Data/Hora</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Tipo</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Qtd</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Valor Unit.</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Desconto</th>
-                  <th className="px-5 py-3.5 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">Total</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Vendedor</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Usuário</th>
-                  <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Obs.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {movs.map((m) => (
-                  <tr key={m.id} className="hover:bg-gray-50/60 transition-colors">
-                    <td className="px-5 py-3.5 text-sm text-gray-400 whitespace-nowrap">{formatDateTime(m.criado_em)}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg ${tipoBadge[m.tipo]}`}>
-                        {tipoLabel[m.tipo]}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <div>
-                        <p className="text-sm text-gray-800 font-medium">{m.produto.nome}</p>
-                      </div>
-                    </td>
-                    <td className={`px-5 py-3.5 text-sm text-right font-bold ${m.tipo === 'ENTRADA' ? 'text-emerald-600' : 'text-red-500'}`}>
-                      {m.tipo === 'ENTRADA' ? '+' : '-'}{m.quantidade}
-                    </td>
-                    <td className="px-5 py-3.5 text-sm text-gray-500 text-right">{formatCurrency(m.valor_unit)}</td>
-                    <td className="px-5 py-3.5 text-sm text-red-400 text-right font-medium">
-                      {m.desconto && Number(m.desconto) > 0 ? `-${formatCurrency(m.desconto)}` : '—'}
-                    </td>
-                    <td className="px-5 py-3.5 text-sm text-gray-800 text-right font-semibold">{formatCurrency(m.valor_total)}</td>
-                    <td className="px-5 py-3.5 text-sm text-gray-500">{m.vendedor ? m.vendedor.nome : '—'}</td>
-                    <td className="px-5 py-3.5 text-sm text-gray-500">{m.usuario.nome}</td>
-                    <td className="px-5 py-3.5 text-sm text-gray-300 max-w-[150px] truncate">{m.observacao ?? '—'}</td>
+        <div className="space-y-6">
+          <div className="table-container">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px]">
+                <thead className="table-header">
+                  <tr>
+                    <th className="table-th text-left">Data e Hora</th>
+                    <th className="table-th text-left">Tipo</th>
+                    <th className="table-th text-left">Produto</th>
+                    <th className="table-th text-right">Qtd</th>
+                    <th className="table-th text-right">Valor Unit.</th>
+                    <th className="table-th text-right">Desconto</th>
+                    <th className="table-th text-right">Total</th>
+                    <th className="table-th text-left">Responsável</th>
                   </tr>
-                ))}
-                {movs.length === 0 && (
-                  <tr><td colSpan={10} className="px-5 py-12 text-center text-gray-300">
-                    <div className="flex flex-col items-center gap-2">
-                      <History className="w-8 h-8" />
-                      <span className="text-sm">Nenhuma movimentação encontrada</span>
-                    </div>
-                  </td></tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="table-tbody">
+                  {movs.map((m) => (
+                    <tr key={m.id} className="table-tr">
+                      <td className="table-td">
+                        <span className="table-td-subtext font-medium">{formatDateTime(m.criado_em)}</span>
+                      </td>
+                      <td className="table-td">
+                        <span className={`inline-flex px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg
+                          ${m.tipo === 'ENTRADA' ? 'bg-emerald-500/10 text-emerald-600' : 
+                            m.tipo === 'SAIDA_VENDA' ? 'bg-blue-500/10 text-blue-600' : 
+                            'bg-rose-500/10 text-rose-600'}`}>
+                          {tipoLabel[m.tipo]}
+                        </span>
+                      </td>
+                      <td className="table-td">
+                        <div className="flex flex-col">
+                          <span className="table-td-text">{m.produto.nome}</span>
+                          <span className="table-td-subtext font-mono uppercase">{m.produto.sku}</span>
+                        </div>
+                      </td>
+                      <td className="table-td text-right font-black">
+                        <span className={m.tipo === 'ENTRADA' ? 'text-emerald-500' : 'text-rose-500'}>
+                          {m.tipo === 'ENTRADA' ? '+' : '-'}{m.quantidade}
+                        </span>
+                      </td>
+                      <td className="table-td text-right table-td-subtext font-bold">{formatCurrency(m.valor_unit)}</td>
+                      <td className="table-td text-right font-bold text-rose-400">
+                        {m.desconto && Number(m.desconto) > 0 ? `-${formatCurrency(m.desconto)}` : <span className="opacity-20">—</span>}
+                      </td>
+                      <td className="table-td text-right font-black text-slate-900 dark:text-white">
+                        {formatCurrency(m.valor_total)}
+                      </td>
+                      <td className="table-td">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{m.vendedor ? m.vendedor.nome : m.usuario.nome}</span>
+                          {m.vendedor && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Vendedor</span>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {movs.length === 0 && (
+                    <tr>
+                      <td colSpan={8} className="table-td py-24 text-center">
+                        <div className="flex flex-col items-center gap-3 text-slate-300 dark:text-slate-800">
+                          <History className="w-16 h-16 opacity-20" />
+                          <span className="text-lg font-bold">Nenhuma movimentação registrada</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* Pagination */}
           {totalPaginas > 1 && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-4 py-4">
               <button
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="btn-secondary px-3 py-2"
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl disabled:opacity-20 hover:bg-slate-50 transition-all shadow-sm"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="text-sm text-gray-400 px-3">Página {pagina} de {totalPaginas}</span>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-6 py-2.5 rounded-xl text-sm font-black text-slate-900 dark:text-white shadow-sm">
+                Página {pagina} de {totalPaginas}
+              </div>
               <button
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                 disabled={pagina === totalPaginas}
-                className="btn-secondary px-3 py-2"
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl disabled:opacity-20 hover:bg-slate-50 transition-all shadow-sm"
               >
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

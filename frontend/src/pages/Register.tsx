@@ -27,33 +27,33 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 via-white to-brand-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500 shadow-lg shadow-brand-500/30 mb-4">
-            <Package className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Criar Conta</h1>
-          <p className="text-gray-400 text-sm mt-1">Registre-se para acessar o sistema</p>
+return (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-50 via-white to-brand-50 p-4 dark:from-dark-50 dark:via-dark-100 dark:to-dark-50">
+    <div className="w-full max-w-md">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-500 shadow-lg shadow-brand-500/30 mb-4">
+          <Package className="w-7 h-7 text-white" />
         </div>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Criar Conta</h1>
+        <p className="text-gray-400 text-sm mt-1 dark:text-gray-500">Registre-se para acessar o sistema</p>
+      </div>
 
-        {sucesso ? (
-          <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8 text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 mx-auto">
-              <Lock className="w-7 h-7 text-amber-500" />
-            </div>
-            <h2 className="text-lg font-bold text-gray-800">Solicitação Enviada!</h2>
-            <p className="text-sm text-gray-500">
-              Sua conta está <span className="font-semibold text-amber-600">aguardando aprovação</span> de um administrador. Assim que for aprovada, você poderá fazer login normalmente.
-            </p>
-            <button
-              onClick={onSwitchToLogin}
-              className="w-full btn-primary justify-center py-2.5 text-base"
-            >
-              Ir para o Login
-            </button>
+      {sucesso ? (
+        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/60 border border-gray-100 p-8 text-center space-y-4 dark:bg-dark-100 dark:shadow-none dark:border-dark-200">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 mx-auto">
+            <Lock className="w-7 h-7 text-amber-500" />
           </div>
+          <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200">Solicitação Enviada!</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Sua conta está <span className="font-semibold text-amber-600 dark:text-amber-400">aguardando aprovação</span> de um administrador. Assim que for aprovada, você poderá fazer login normalmente.
+          </p>
+          <button
+            onClick={onSwitchToLogin}
+            className="w-full btn-primary justify-center py-2.5 text-base"
+          >
+            Ir para o Login
+          </button>
+        </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -111,30 +111,30 @@ export default function Register({ onSwitchToLogin }: { onSwitchToLogin: () => v
                 <option value="ADMIN">Administrador (Acesso Total)</option>
               </select>
             </div>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary justify-center py-2.5 text-base"
-            >
-              {loading ? 'Registrando...' : 'Registrar'}
-            </button>
-          </form>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+            {error}
+          </div>
         )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full btn-primary justify-center py-2.5 text-base"
+        >
+          {loading ? 'Registrando...' : 'Registrar'}
+        </button>
+      </form>
+      )}
 
-        {!sucesso && (
-          <p className="text-center mt-6 text-sm text-gray-500">
-            Já tem conta?{' '}
-            <button onClick={onSwitchToLogin} className="text-brand-500 hover:text-brand-600 font-medium">
-              Entrar
-            </button>
-          </p>
-        )}
-      </div>
+      {!sucesso && (
+        <p className="text-center mt-6 text-sm text-gray-500 dark:text-gray-400">
+          Já tem conta?{' '}
+          <button onClick={onSwitchToLogin} className="text-brand-500 hover:text-brand-600 font-medium dark:hover:text-brand-400">
+            Entrar
+          </button>
+        </p>
+      )}
     </div>
-  );
+  </div>
+);
 }
